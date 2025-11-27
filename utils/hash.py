@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 
 # Algoritmo recomendado para APIs
-pwd_context = CryptContext(schemes=["argon-2"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def hash_password(password: str):
     """Devuelve la contraseña hasheada"""
