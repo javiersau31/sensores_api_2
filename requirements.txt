@@ -2,7 +2,7 @@ fastapi
 uvicorn
 pymongo
 python-dotenv
-passlib
+passlib[argon2]
 python-jose
-bcrypt
 email-validator
+argon2-cffi
