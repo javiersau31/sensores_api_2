@@ -9,4 +9,5 @@ MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
 db = client["integradoraII"]
 usuarios_collection = db["usuarios"]
-sensores_collection = db["sensores"]
+sensores_collection = db["sensores_actual"]
+lecturas_collection = db["lecturas_historicas"]

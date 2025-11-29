@@ -19,9 +19,7 @@ def usuario_mongo_a_dict(usuario_mongo):
     )
 
 
-# ============================================================
-# 🔹 REGISTRO DE USUARIOS
-# ============================================================
+# Registrar usuario
 @router.post("/registro", response_model=UsuarioDB)
 def registrar_usuario(usuario: UsuarioRegistro):
 
@@ -50,9 +48,7 @@ def registrar_usuario(usuario: UsuarioRegistro):
     return usuario_mongo_a_dict(nuevo_usuario)
 
 
-# ============================================================
-# 🔹 LOGIN DE USUARIOS
-# ============================================================
+#login usuario
 @router.post("/login",response_model=LoginResponse )
 def login_usuario(datos: UsuarioLogin):
 
