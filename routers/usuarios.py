@@ -86,14 +86,14 @@ def login_usuario(datos: UsuarioLogin):
         }
     }
 
-router.get("/todos",response_model=List(UsuarioDB) )
+router.get("/todos",response_model=List[UsuarioDB] )
 def obtener_usuarios():
     usuarios = usuarios_collection.find()
     return [usuario_mongo_a_dict(u) for u in usuarios]
 
 
 router.delete("/eliminar/{usuario_id}")
-def eliminar_usuario(id:str):
+def eliminar_usuario(usuario_id:str):
     resultado = usuarios_collection.delete_one({"_id": ObjectId(id)})
     if resultado.deleted_count == 0:
         raise HTTPException(
