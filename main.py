@@ -7,7 +7,7 @@ from datetime import datetime
 app = FastAPI()
 
 app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuarios"])
-app.include_router(sensores.router, prefix="/sensores")
+app.include_router(sensores.router, prefix="/sensores", tags=["Sensores"])
 
 @app.get("/")
 def home():

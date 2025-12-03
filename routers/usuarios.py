@@ -84,3 +84,19 @@ def login_usuario(datos: UsuarioLogin):
             "rol": usuario["rol"]
         }
     }
+
+router.get("/todos",response_model=list(UsuarioDB) )
+def obtener_usuarios():
+    usuarios = usuarios_collection.find()
+    return [usuario_mongo_a_dict(u) for u in usuarios]
+
+
+router.delete("/eliminar/{usuario_id}")
+def eliminar_usuario(id:str):
+    resultado = usuarios_collection.delete_one({"_id": ObjectId(id)})
+    if resultado.deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado."
+        )
+    return {"mensaje": "Usuario eliminado correctamente."}
