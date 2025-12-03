@@ -5,6 +5,7 @@ from database import usuarios_collection
 from datetime import datetime
 from bson import ObjectId
 from utils.jwt_manager import crear_access_token
+from typing import List
 
 router = APIRouter()
 
@@ -85,7 +86,7 @@ def login_usuario(datos: UsuarioLogin):
         }
     }
 
-router.get("/todos",response_model=list(UsuarioDB) )
+router.get("/todos",response_model=List(UsuarioDB) )
 def obtener_usuarios():
     usuarios = usuarios_collection.find()
     return [usuario_mongo_a_dict(u) for u in usuarios]
