@@ -9,3 +9,5 @@ class LecturasActuales(BaseModel):
     movimiento: int = Field(..., ge=0, le=1)
     puerta: str
     fecha: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    comando_pendiente: Optional[bool] = False
+

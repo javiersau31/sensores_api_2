@@ -75,20 +75,39 @@ def desactivar_movimiento():
 #Abrir puerta
 @router.put("/abrir_puerta", response_model=Lectura)
 def abrir_puerta():
-
-    result = sensores_collection.update_one(
+    # Guardamos una instrucción explícita en Mongo
+    sensores_collection.update_one(
         {"_id": "estado_general"},
-        {"$set": {"puerta": "abierta"}}
+        {
+            "$set": {
+                "puerta": "abierta", 
+                "comando_pendiente": True  # <--- ESTO ES LA CLAVE
+            }
+        }
     )
-
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Sensor no encontrado")
 
     lectura = sensores_collection.find_one({"_id": "estado_general"})
     lectura.pop("_id", None)
-
     return Lectura(**lectura)
 
+# 2. Agrega este endpoint NUEVO para tu Script Python
+@router.get("/verificar_comando")
+def verificar_comando():
+    """
+    Este endpoint lo consultará tu Python local para saber si debe abrir.
+    """
+    doc = sensores_collection.find_one({"_id": "estado_general"})
+    
+    if doc and doc.get("comando_pendiente") == True:
+        # Si hay comando, lo devolvemos y LO APAGAMOS inmediatamente
+        # para que la puerta no se quede abriendo bucleada.
+        sensores_collection.update_one(
+            {"_id": "estado_general"},
+            {"$set": {"comando_pendiente": False}}
+        )
+        return {"accion": "ABRIR"}
+    
+    return {"accion": "NADA"}
 
 #Historial de lecturas
 @router.get("/historial", response_model=List[Lectura])
