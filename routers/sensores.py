@@ -5,15 +5,15 @@ from typing import List
 
 router = APIRouter()
 
-
-# Registrar lectura (desde ESP32)
+# ---------------------------------------------------------
+# 1. REGISTRAR LECTURA (Desde Python/ESP32)
+# ---------------------------------------------------------
 @router.post("/registrar", response_model=Lectura)
 def registrar_lectura(lectura: Lectura):
-
-    # 1️ Guardar en historial
+    # 1. Guardar en historial (colección de logs)
     lecturas_collection.insert_one(lectura.dict())
 
-    # 2️ Guardar como lectura actual global
+    # 2. Guardar como lectura actual global (estado actual)
     sensores_collection.update_one(
         {"_id": "estado_general"},
         {"$set": lectura.dict()},
@@ -22,24 +22,26 @@ def registrar_lectura(lectura: Lectura):
 
     return lectura
 
-
-#Lectura para el dashboard--
+# ---------------------------------------------------------
+# 2. OBTENER LECTURA ACTUAL (Para Dashboard iOS)
+# ---------------------------------------------------------
 @router.get("/actual", response_model=Lectura)
 def obtener_actual():
     lectura = sensores_collection.find_one({"_id": "estado_general"})
+    
     if not lectura:
         raise HTTPException(status_code=404, detail="No hay lecturas actuales")
 
-    # Quitamos el _id si existe
+    # Quitamos el _id de Mongo para que no falle Pydantic
     lectura.pop("_id", None)
 
     return Lectura(**lectura)
 
-
-#actualizar lectura manualmente
+# ---------------------------------------------------------
+# 3. ACTUALIZAR MANUALMENTE (Debug)
+# ---------------------------------------------------------
 @router.put("/actualizar", response_model=Lectura)
 def actualizar_sensor(data: dict):
-
     result = sensores_collection.update_one(
         {"_id": "estado_general"},
         {"$set": data}
@@ -53,11 +55,11 @@ def actualizar_sensor(data: dict):
 
     return Lectura(**lectura)
 
-
-#Desactivar lectura de movimiento-
+# ---------------------------------------------------------
+# 4. DESACTIVAR MOVIMIENTO (Resetear alarma)
+# ---------------------------------------------------------
 @router.put("/desactivar_movimiento", response_model=Lectura)
 def desactivar_movimiento():
-
     result = sensores_collection.update_one(
         {"_id": "estado_general"},
         {"$set": {"movimiento": 0}}
@@ -71,17 +73,18 @@ def desactivar_movimiento():
 
     return Lectura(**lectura)
 
-
-#Abrir puerta
+# ---------------------------------------------------------
+# 5. ABRIR PUERTA (Desde Botón iOS)
+# ---------------------------------------------------------
 @router.put("/abrir_puerta", response_model=Lectura)
 def abrir_puerta():
-    # Guardamos una instrucción explícita en Mongo
+    # Establecemos la puerta como abierta Y activamos la bandera de comando
     sensores_collection.update_one(
         {"_id": "estado_general"},
         {
             "$set": {
                 "puerta": "abierta", 
-                "comando_pendiente": True  # <--- ESTO ES LA CLAVE
+                "comando_pendiente": True 
             }
         }
     )
@@ -90,7 +93,9 @@ def abrir_puerta():
     lectura.pop("_id", None)
     return Lectura(**lectura)
 
-# 2. Agrega este endpoint NUEVO para tu Script Python
+# ---------------------------------------------------------
+# 6. VERIFICAR COMANDO (Consultado por Python Script)
+# ---------------------------------------------------------
 @router.get("/verificar_comando")
 def verificar_comando():
     """
@@ -98,9 +103,10 @@ def verificar_comando():
     """
     doc = sensores_collection.find_one({"_id": "estado_general"})
     
-    if doc and doc.get("comando_pendiente") == True:
+    # Verificamos si existe el documento y si comando_pendiente es True
+    if doc and doc.get("comando_pendiente") is True:
         # Si hay comando, lo devolvemos y LO APAGAMOS inmediatamente
-        # para que la puerta no se quede abriendo bucleada.
+        # para que la puerta no se quede abriendo en bucle.
         sensores_collection.update_one(
             {"_id": "estado_general"},
             {"$set": {"comando_pendiente": False}}
@@ -109,9 +115,10 @@ def verificar_comando():
     
     return {"accion": "NADA"}
 
-#Historial de lecturas
+# ---------------------------------------------------------
+# 7. HISTORIAL
+# ---------------------------------------------------------
 @router.get("/historial", response_model=List[Lectura])
 def historial(limit: int = 100):
     cursor = lecturas_collection.find().sort("fecha", -1).limit(limit)
-
     return [Lectura(**doc) for doc in cursor]
