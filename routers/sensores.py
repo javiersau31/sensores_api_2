@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from modelos.sensores import SensorDato, SpotActual, HistorialLectura
-from database import sensor_actual_collection, historial_sensores_collection
+from database import spots_actuales_collection, historial_lecturas_collection
 from datetime import datetime
 from bson import ObjectId
 
@@ -23,12 +23,12 @@ def registrar_lectura(spot_id: str, datos: list[SensorDato]):
         "fecha_lectura": fecha
     }
 
-    historial_sensores_collection.insert_one(historial_doc)
+    historial_lecturas_collection.insert_one(historial_doc)
 
     # -----------------------------------------------------
     # Actualizar ESTADO ACTUAL
     # -----------------------------------------------------
-    sensor_actual_collection.update_one(
+    spots_actuales_collection.update_one(
         {"_id": spot_id},
         {
             "$set": {
@@ -52,7 +52,7 @@ def registrar_lectura(spot_id: str, datos: list[SensorDato]):
 # ---------------------------------------------------------
 @router.get("/actual/{spot_id}", response_model=SpotActual)
 def obtener_actual(spot_id: str):
-    doc = sensor_actual_collection.find_one({"_id": spot_id})
+    doc = spots_actuales_collection.find_one({"_id": spot_id})
 
     if not doc:
         raise HTTPException(status_code=404, detail="Spot no encontrado")
@@ -70,7 +70,7 @@ def obtener_actual(spot_id: str):
 @router.put("/reset_movimiento/{spot_id}")
 def reset_movimiento(spot_id: str):
 
-    spot = sensor_actual_collection.find_one({"_id": spot_id})
+    spot = spots_actuales_collection.find_one({"_id": spot_id})
     if not spot:
         raise HTTPException(status_code=404, detail="Spot no encontrado")
 
@@ -96,7 +96,7 @@ def reset_movimiento(spot_id: str):
 @router.put("/abrir_puerta/{spot_id}")
 def abrir_puerta(spot_id: str):
 
-    sensor_actual_collection.update_one(
+    spots_actuales_collection.update_one(
         {"_id": spot_id},
         {"$set": {"comando_puerta": True}}
     )
@@ -111,13 +111,13 @@ def abrir_puerta(spot_id: str):
 @router.get("/verificar_comando/{spot_id}")
 def verificar_comando(spot_id: str):
 
-    doc = sensor_actual_collection.find_one({"_id": spot_id})
+    doc = spots_actuales_collection.find_one({"_id": spot_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Spot no encontrado")
 
     if doc.get("comando_puerta") == True:
         # apagar comando inmediatamente
-        sensor_actual_collection.update_one(
+        spots_actuales_collection.update_one(
             {"_id": spot_id},
             {"$set": {"comando_puerta": False}}
         )
@@ -134,7 +134,7 @@ def verificar_comando(spot_id: str):
 def historial(spot_id: str, limit: int = 50):
 
     cursor = (
-        historial_sensores_collection
+        historial_lecturas_collection
         .find({"spot_id": spot_id})
         .sort("fecha_lectura", -1)
         .limit(limit)
