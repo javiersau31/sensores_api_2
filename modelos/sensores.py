@@ -2,12 +2,22 @@ from pydantic import BaseModel,Field
 from datetime import datetime
 from typing import Optional
 
-class LecturasActuales(BaseModel):
-    temperatura: float
-    humedad: float
-    gas: int = Field(..., ge=0, le=4095)
-    movimiento: int = Field(..., ge=0, le=1)
-    puerta: str
-    fecha: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    comando_pendiente: Optional[bool] = False
+class SensorDato(BaseModel):
+    sensor_id: str
+    tipo: str
+    ultimo_dato: float | int
+    
+class SpotActual(BaseModel):
+    id: str
+    nombre: str
+    ubicacion_id: str
+    ultimo_estado: list[SensorDato]
+    fecha_actualizacion: datetime
+
+class HistorialLectura(BaseModel):
+    id: str
+    spot_id: str
+    lecturas: list[SensorDato]
+    fecha_lectura: datetime
+
 
