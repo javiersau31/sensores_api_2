@@ -81,7 +81,7 @@ def reset_movimiento(spot_id: str):
         if sensor["tipo"] == "movimiento":
             sensor["ultimo_dato"] = 0
 
-    sensor_actual_collection.update_one(
+    spots_actuales_collection.update_one(
         {"_id": spot_id},
         {"$set": {"ultimo_estado": sensores}}
     )
