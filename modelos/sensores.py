@@ -147,6 +147,3 @@ def historial(spot_id: str, limit: int = 50):
         resultados.append(HistorialLectura(**doc))
 
     return resultados
-
-
-
