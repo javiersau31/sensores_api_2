@@ -1,66 +1,72 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import List, Optional
 
-# Modelo base de usuario
+
+# -------------------------
+#  TARJETAS
+# -------------------------
+class Tarjeta(BaseModel):
+    uid: str
+    descripcion: Optional[str] = None
+    fecha_registro: datetime
+
+
+# -------------------------
+# BASE USUARIO
+# -------------------------
 class UsuarioBase(BaseModel):
     nombre: str
     email: EmailStr
-    rol: str = "usuario"   # usuario o admin
+    rol: str = "usuario"   # usuario | admin
 
-# Para registrar usuarios
+
+# -------------------------
+# REGISTRO
+# -------------------------
 class UsuarioRegistro(UsuarioBase):
     password: str
 
-# Para devolver usuarios desde MongoDB
+
+# -------------------------
+# USUARIO COMO SE GUARDA EN MONGO
+# -------------------------
 class UsuarioDB(UsuarioBase):
     id: str
+    tarjetas: List[Tarjeta] = []
     fecha_registro: datetime
 
-# Para login
+
+# -------------------------
+# LOGIN
+# -------------------------
 class UsuarioLogin(BaseModel):
     email: EmailStr
     password: str
 
-# Token JWT
+
+# -------------------------
+# RESPUESTA JWT
+# -------------------------
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
 
-from pydantic import BaseModel, EmailStr
-from datetime import datetime
-
-# Modelo base de usuario
-class UsuarioBase(BaseModel):
-    nombre: str
-    email: EmailStr
-    rol: str = "usuario"   # usuario o admin
-
-# Para registrar usuarios
-class UsuarioRegistro(UsuarioBase):
-    password: str
-
-# Para devolver usuarios desde MongoDB
-class UsuarioDB(UsuarioBase):
-    id: str
-    fecha_registro: datetime
-
-# Para login
-class UsuarioLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-# Token JWT
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
+# -------------------------
+# DATOS DEL USUARIO PA' RESPUESTA
+# -------------------------
 class UsuarioLoginData(BaseModel):
     id: str
     nombre: str
     email: EmailStr
     rol: str
+    tarjetas: List[Tarjeta] = []
 
+
+# -------------------------
+# RESPUESTA COMPLETA
+# -------------------------
 class LoginResponse(BaseModel):
     mensaje: str
     token: str
