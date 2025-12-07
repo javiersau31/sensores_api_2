@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Optional
 
 # --- Modelo para cada dato de sensor ---
 class SensorDato(BaseModel):
@@ -14,13 +14,13 @@ class SpotActual(BaseModel):
     id: str                      # Ej: "01"
     nombre: str                  # Ej: "principal"
     ubicacion_id: str            # Ej: "SUC0001"
-    ultimo_estado: List[SensorDato]
+    ultimo_estado: Optional[List[SensorDato]] = Field(default_factory=list) 
     fecha_actualizacion: datetime = Field(default_factory=datetime.utcnow)
 
 
 # --- Historial de lecturas (cada registro que viene de Raspberry) ---
 class HistorialLectura(BaseModel):
-    id: str                      # Se generará como str(ObjectId)
+    id: Optional[str] = None                     # Se generará como str(ObjectId)
     spot_id: str                 # El spot al que pertenece
     lecturas: List[SensorDato]   # Misma estructura de estado actual
     fecha_lectura: datetime = Field(default_factory=datetime.utcnow)

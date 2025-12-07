@@ -32,7 +32,7 @@ class UsuarioRegistro(UsuarioBase):
 # USUARIO COMO SE GUARDA EN MONGO
 # -------------------------
 class UsuarioDB(UsuarioBase):
-    id: str
+    id: Optional[str] = None  # Se generará como str(ObjectId)
     tarjetas: List[Tarjeta] = []
     fecha_registro: datetime
 

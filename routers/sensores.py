@@ -7,6 +7,22 @@ from bson import ObjectId
 router = APIRouter()
 
 
+@router.post("/crear_spot")
+def crear_spot(spot: SpotActual):
+    doc = {
+        "_id": spot.id,
+        "nombre": spot.nombre,
+        "ubicacion_id": spot.ubicacion_id,
+        "ultimo_estado": [],
+        "fecha_actualizacion": datetime.utcnow(),
+        "comando_puerta": False
+    }
+
+    spots_actuales_collection.insert_one(doc)
+
+    return {"mensaje": "Spot creado correctamente", "spot_id": spot.id}
+
+
 # ---------------------------------------------------------
 # 1. REGISTRAR LECTURA COMPLETA DESDE ESP32
 # ---------------------------------------------------------
