@@ -108,9 +108,23 @@ def obtener_usuarios():
 @router.delete("/eliminar/{usuario_id}")
 def eliminar_usuario(usuario_id: str):
 
-    resultado = usuarios_collection.delete_one({
-        "_id": ObjectId(usuario_id)
-    })
+    # 1. Verificar si el usuario existe
+    usuario = usuarios_collection.find_one({"_id": ObjectId(usuario_id)})
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado."
+        )
+
+    # 2. Validar que no sea un usuario administrador
+    if usuario.get("rol") == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No se puede eliminar un usuario administrador."
+        )
+
+    # 3. Proceder a eliminar
+    resultado = usuarios_collection.delete_one({"_id": ObjectId(usuario_id)})
 
     if resultado.deleted_count == 0:
         raise HTTPException(
