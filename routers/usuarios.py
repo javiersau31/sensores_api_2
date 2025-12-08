@@ -86,7 +86,8 @@ def login_usuario(datos: UsuarioLogin):
         id=str(usuario["_id"]),
         nombre=usuario["nombre"],
         email=usuario["email"],
-        rol=usuario["rol"]
+        rol=usuario["rol"],
+        tarjetas=usuario.get("tarjetas", [])
     )
 
     return LoginResponse(
