@@ -11,7 +11,7 @@ class UbicacionSpot(BaseModel):
 class SensorDato(BaseModel):
     sensor_id: str               # Ej: temp01, gas01, pir01
     tipo: str                    # Ej: temperatura, gas, movimiento
-    ultimo_dato: Union[float, int]
+    ultimo_dato: Union[float, int, str]  # Ej: 23.5, 0, "OK"
 
 
 # --- Estado actual de un Spot (una ubicación con sensores) ---
@@ -33,4 +33,5 @@ class HistorialLectura(BaseModel):
 
 class DatoAccesoRFID(BaseModel):
     spot_id: str
+    uid: str
 
