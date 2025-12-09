@@ -2,6 +2,11 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List, Union, Optional
 
+
+class UbicacionSpot(BaseModel):
+    id: str       # Ej: "SUC0001"
+    nombre: str   # Ej: "Torreón Centro"
+
 # --- Modelo para cada dato de sensor ---
 class SensorDato(BaseModel):
     sensor_id: str               # Ej: temp01, gas01, pir01
@@ -13,7 +18,7 @@ class SensorDato(BaseModel):
 class SpotActual(BaseModel):
     id: str                      # Ej: "01"
     nombre: str                  # Ej: "principal"
-    ubicacion_id: str            # Ej: "SUC0001"
+    ubicacion_id: UbicacionSpot            # Ej: "SUC0001"
     ultimo_estado: Optional[List[SensorDato]] = Field(default_factory=list) 
     fecha_actualizacion: datetime = Field(default_factory=datetime.utcnow)
 
@@ -24,3 +29,8 @@ class HistorialLectura(BaseModel):
     spot_id: str                 # El spot al que pertenece
     lecturas: List[SensorDato]   # Misma estructura de estado actual
     fecha_lectura: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DatoAccesoRFID(BaseModel):
+    spot_id: str
+

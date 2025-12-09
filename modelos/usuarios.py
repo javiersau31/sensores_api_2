@@ -2,6 +2,9 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import List, Optional
 
+class TarjetaAsignar(BaseModel):
+    uid: str
+    descripcion: Optional[str] = None
 
 # -------------------------
 #  TARJETAS
@@ -71,3 +74,5 @@ class LoginResponse(BaseModel):
     mensaje: str
     token: str
     usuario: UsuarioLoginData
+
+

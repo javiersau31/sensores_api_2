@@ -1,10 +1,52 @@
 from fastapi import APIRouter, HTTPException
-from modelos.sensores import SensorDato, SpotActual, HistorialLectura
-from database import spots_actuales_collection, historial_lecturas_collection
+from modelos.sensores import SensorDato, SpotActual, HistorialLectura, DatoAccesoRFID
+from database import spots_actuales_collection, historial_lecturas_collection, accesos_collection,usuarios_collection
 from datetime import datetime
 from bson import ObjectId
+from modelos.usuarios import UsuarioDB
 
 router = APIRouter()
+
+
+@router.post("/registrar_acceso")
+def registrar_acceso(datos: DatoAccesoRFID):
+    fecha = datetime.utcnow()
+    
+    # 1. BUSCAR USUARIO DUEÑO DE LA TARJETA
+    # Buscamos en la colección de usuarios alguien que tenga este UID en su lista de tarjetas
+    usuario_doc = usuarios_collection.find_one({"tarjetas.uid": datos.uid})
+    
+    nombre_usuario = "Desconocido"
+    usuario_id = None
+    acceso_autorizado = False
+
+    if usuario_doc:
+        usuario = UsuarioDB(**usuario_doc) # Convertimos a objeto Pydantic
+        nombre_usuario = usuario.nombre
+        usuario_id = str(usuario.id)
+        acceso_autorizado = True
+        
+        # Opcional: Aquí podrías activar la puerta automáticamente si es autorizado
+        # spots_actuales_collection.update_one({"_id": datos.spot_id}, {"$set": {"comando_puerta": True}})
+
+    # 2. CREAR REGISTRO DE ACCESO
+    acceso_doc = {
+        "spot_id": datos.spot_id,
+        "tarjeta_uid": datos.uid,
+        "usuario_id": usuario_id,
+        "nombre_usuario": nombre_usuario, # Guardamos el nombre para historial rápido
+        "fecha": fecha,
+        "autorizado": acceso_autorizado,
+        "tipo": "ENTRADA_RFID"
+    }
+
+    accesos_collection.insert_one(acceso_doc)
+
+    # 3. RESPONDER
+    if acceso_autorizado:
+        return {"mensaje": f"Bienvenido {nombre_usuario}", "acceso": True}
+    else:
+        return {"mensaje": "Tarjeta no registrada", "acceso": False}
 
 
 @router.post("/crear_spot")
@@ -12,7 +54,7 @@ def crear_spot(spot: SpotActual):
     doc = {
         "_id": spot.id,
         "nombre": spot.nombre,
-        "ubicacion_id": spot.ubicacion_id,
+        "ubicacion_id": spot.ubicacion.dict(),
         "ultimo_estado": [],
         "fecha_actualizacion": datetime.utcnow(),
         "comando_puerta": False

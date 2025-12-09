@@ -4,7 +4,8 @@ from modelos.usuarios import (
     UsuarioLogin,
     UsuarioDB,
     LoginResponse,
-    UsuarioLoginData
+    UsuarioLoginData,
+    TarjetaAsignar
 )
 from utils.hash import hash_password, verify_password
 from database import usuarios_collection
@@ -133,3 +134,31 @@ def eliminar_usuario(usuario_id: str):
         )
 
     return {"mensaje": "Usuario eliminado correctamente."}
+
+@router.post("/{usuario_id}/asignar_tarjeta")
+def asignar_tarjeta(usuario_id: str, tarjeta: TarjetaAsignar):
+    try:
+        obj_id = ObjectId(usuario_id)
+    except:
+        raise HTTPException(status_code=400, detail="ID de usuario inválido")
+
+    # Usuario con PyMongo síncrono
+    usuario = usuarios_collection.find_one({"_id": obj_id})
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if any(t["uid"] == tarjeta.uid for t in usuario.get("tarjetas", [])):
+        raise HTTPException(status_code=400, detail="Tarjeta ya asignada")
+
+    nueva_tarjeta = {
+        "uid": tarjeta.uid,
+        "descripcion": tarjeta.descripcion,
+        "fecha_registro": datetime.utcnow()
+    }
+
+    usuarios_collection.update_one(
+        {"_id": obj_id},
+        {"$push": {"tarjetas": nueva_tarjeta}}
+    )
+
+    return {"mensaje": "Tarjeta asignada correctamente"}
