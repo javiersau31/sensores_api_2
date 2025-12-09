@@ -54,7 +54,7 @@ def crear_spot(spot: SpotActual):
     doc = {
         "_id": spot.id,
         "nombre": spot.nombre,
-        "ubicacion_id": spot.ubicacion.dict(),
+        "ubicacion": spot.ubicacion.dict(),
         "ultimo_estado": [],
         "fecha_actualizacion": datetime.utcnow(),
         "comando_puerta": False
