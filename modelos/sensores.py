@@ -18,7 +18,7 @@ class SensorDato(BaseModel):
 class SpotActual(BaseModel):
     id: str                      # Ej: "01"
     nombre: str                  # Ej: "principal"
-    ubicacion_id: UbicacionSpot            # Ej: "SUC0001"
+    ubicacion: UbicacionSpot            # Ej: "SUC0001"
     ultimo_estado: Optional[List[SensorDato]] = Field(default_factory=list) 
     fecha_actualizacion: datetime = Field(default_factory=datetime.utcnow)
 
