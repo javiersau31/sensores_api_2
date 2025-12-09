@@ -13,7 +13,7 @@ def registrar_acceso(datos: DatoAccesoRFID):
     fecha = datetime.utcnow()
     
     # 1. BUSCAR USUARIO DUEÑO DE LA TARJETA
-    # Buscamos en la colección de usuarios alguien que tenga este UID en su lista de tarjetas
+    
     usuario_doc = usuarios_collection.find_one({"tarjetas.uid": datos.uid})
     
     nombre_usuario = "Desconocido"
@@ -23,11 +23,11 @@ def registrar_acceso(datos: DatoAccesoRFID):
     if usuario_doc:
         usuario = UsuarioDB(**usuario_doc) # Convertimos a objeto Pydantic
         nombre_usuario = usuario.nombre
-        usuario_id = str(usuario.id)
+        usuario_id = str(usuario_doc["_id"])
         acceso_autorizado = True
         
-        # Opcional: Aquí podrías activar la puerta automáticamente si es autorizado
-        # spots_actuales_collection.update_one({"_id": datos.spot_id}, {"$set": {"comando_puerta": True}})
+        #
+        
 
     # 2. CREAR REGISTRO DE ACCESO
     acceso_doc = {
@@ -66,7 +66,7 @@ def crear_spot(spot: SpotActual):
 
 
 # ---------------------------------------------------------
-# 1. REGISTRAR LECTURA COMPLETA DESDE ESP32
+# 1. REGISTRAR LECTURA COMPLETA
 # ---------------------------------------------------------
 @router.post("/registrar/{spot_id}")
 def registrar_lectura(spot_id: str, datos: list[SensorDato]):
