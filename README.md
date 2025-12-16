@@ -1,0 +1,1 @@
+Sistema backend encargado de la recolección de datos desde una Raspberry Pi, su persistencia en MongoDB y su exposición mediante APIs REST, permitiendo la integración con una aplicación iOS para visualización y consumo de la información.
